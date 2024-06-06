@@ -17,7 +17,7 @@ function Auth({ User, setAuthBtn, setEditCreateChanelBtn }) {
   const Fetch = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/user/points/?email=${User.result.email}`,
+        `https://youtubeclone007jnv.onrender.com/user/points/?email=${User.result.email}`,
         {
           method: "GET",
           headers: {

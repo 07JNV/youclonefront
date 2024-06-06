@@ -150,7 +150,7 @@ const CustomVideoPlayer = ({ url, onTripleTapMiddle, videoId }) => {
   const Fetch = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/user/points/?email=${CurrentUser.result.email}`,
+        `https://youtubeclone007jnv.onrender.com/user/points/?email=${CurrentUser.result.email}`,
         {
           method: "POST",
           headers: {

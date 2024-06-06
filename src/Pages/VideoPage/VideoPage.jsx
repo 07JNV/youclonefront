@@ -83,16 +83,16 @@ function VideoPage() {
         <div className="container2_videoPage">
           <div className="video_display_screen_videoPage">
            
-            <CustomVideoPlayer
+            {/* <CustomVideoPlayer
               url={`http://localhost:8080/${vv?.filePath}`}
               onTripleTapMiddle={handleNextVideo}
               videoId={vv._id}
-            />
+            /> */}
             
-            {/* <CustomVideoPlayer
+             <CustomVideoPlayer
               url={`https://youtubeclone007jnv.onrender.com/${vv?.filePath}`}
               onTripleTapMiddle={handleNextVideo}
-            /> */}
+            /> 
             <div className="video_details_videoPage">
               <div className="video_btns_title_VideoPage_cont">
                 <p className="video_title_VideoPage"> {vv?.videoTitle}</p>
