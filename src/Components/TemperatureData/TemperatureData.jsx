@@ -30,7 +30,7 @@ function TemperatureData({ setShowTemp }) {
 
         const plainText = convertToPlainText(city);
         console.log(plainText)
-        const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${plainText}&aqi=yes`;
+        const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${plainText}&aqi=yes`;
 
         try {
           const response = await fetch(url);
