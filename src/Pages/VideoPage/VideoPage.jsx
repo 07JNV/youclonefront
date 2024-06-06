@@ -82,27 +82,17 @@ function VideoPage() {
       <div className="container_videoPage">
         <div className="container2_videoPage">
           <div className="video_display_screen_videoPage">
-            {/* <video
-              src={`http://localhost:8080/${vv?.filePath}`}
-              // src={`https://youtubeclone5031.herokuapp.com/${vv?.filePath}`}
-              
-              controls
-              // autoPlay
-            ></video> */}
-            {/* <CustomVideoPlayer
+           
+            <CustomVideoPlayer
               url={`http://localhost:8080/${vv?.filePath}`}
               onTripleTapMiddle={handleNextVideo}
               videoId={vv._id}
-            /> */}
+            />
+            
             {/* <CustomVideoPlayer
-              url={`https://youtubeclone5031.herokuapp.com/${vv?.filePath}`}
-              onTripleTapMiddle={handleNextVideo}
-              videoId={vv._id}
-            /> */}
-            <CustomVideoPlayer
               url={`https://youtubeclone007jnv.onrender.com/${vv?.filePath}`}
               onTripleTapMiddle={handleNextVideo}
-            />
+            /> */}
             <div className="video_details_videoPage">
               <div className="video_btns_title_VideoPage_cont">
                 <p className="video_title_VideoPage"> {vv?.videoTitle}</p>

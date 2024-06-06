@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { GoogleLogout }  from '@leecheuk/react-google-login';
 import { BiLogOut } from "react-icons/bi";
 import { useDispatch } from "react-redux";
@@ -12,6 +12,37 @@ function Auth({ User, setAuthBtn, setEditCreateChanelBtn }) {
     dispatch(setCurrentUser(null));
     alert("Log Out SuccessFully");
   };
+  
+  const [points,setPoints]=useState(0);
+  const Fetch = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/user/points/?email=${User.result.email}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      // console.log(data);
+      setPoints(data.points);
+
+
+     
+    } catch (error) {
+      console.error("Error fetching data:", error.message);
+    }
+  };
+ useEffect(()=>{
+      Fetch();
+ },[])
+//  console.log(User)
   
   return (
     <div className="Auth_container" onClick={() => setAuthBtn(false)}>
@@ -27,13 +58,14 @@ function Auth({ User, setAuthBtn, setEditCreateChanelBtn }) {
             </p>
           </div>
           <div className="email_Auth">{User?.result.email}</div>
+          <div className="email_Auth">Points:{points}</div>
         </p>
         <div className="btns_Auth">
           {User?.result.name ? (
             <>
               {
                 <Link to={`/chanel/${User?.result._id}`} className="btn_Auth">
-                  Your Chanel
+                  Your Channel
                 </Link>
               }
             </>

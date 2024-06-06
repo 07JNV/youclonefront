@@ -1,17 +1,18 @@
 import React, { useState, useRef } from "react";
 
-import url1 from "./Videos/test.mp4";
+// import url1 from "./Videos/test.mp4";
 import TemperatureData from "../TemperatureData/TemperatureData";
 import CommentSection from "../CommentSection/CommentSection";
+import { useSelector } from "react-redux";
 
-const CustomVideoPlayer = ({ url,onTripleTapMiddle, videoId}) => {
+const CustomVideoPlayer = ({ url, onTripleTapMiddle, videoId }) => {
   const [tapCount, setTapCount] = useState(0);
   const [showTemp, setShowTemp] = useState(false);
   const timeoutRef = useRef(null);
   const firstTapTimeRef = useRef(0);
   const videoRef = useRef(null);
   const longPressTimeoutRef = useRef(null);
-  const [showComment,setShowComment]=useState(false);
+  const [showComment, setShowComment] = useState(false);
 
   // handling tap part
 
@@ -67,8 +68,8 @@ const CustomVideoPlayer = ({ url,onTripleTapMiddle, videoId}) => {
           }
         } else {
           if (relativeX < (3 * videoWidth) / 10) {
-              setShowComment(true);
-              console.log("show comment")
+            setShowComment(true);
+            console.log("show comment");
           }
         }
 
@@ -77,7 +78,7 @@ const CustomVideoPlayer = ({ url,onTripleTapMiddle, videoId}) => {
           relativeX <= (7 * videoWidth) / 10
         ) {
           onTripleTapMiddle();
-          console.log("move to next video")
+          console.log("move to next video");
         }
       }
 
@@ -143,8 +144,46 @@ const CustomVideoPlayer = ({ url,onTripleTapMiddle, videoId}) => {
     }
   };
 
+  const CurrentUser = useSelector((state) => state?.currentUserReducer);
+  console.log(CurrentUser);
+
+  const Fetch = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/user/points/?email=${CurrentUser.result.email}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      console.log(data)
+
+      alert("5 points added successfully");
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching data:", error.message);
+      alert("error");
+    }
+  };
+
+  console.log("current user is ", CurrentUser);
+
   const handleVideoEnd = () => {
     console.log("Video ended. 5 points added to the user's account.");
+    console.log(CurrentUser);
+    if (CurrentUser) {
+      Fetch();
+    } else {
+      alert("please login to add 5 points");
+    }
   };
 
   return (
@@ -167,9 +206,13 @@ const CustomVideoPlayer = ({ url,onTripleTapMiddle, videoId}) => {
         </div>
       )}
 
-      {showComment &&(
+      {showComment && (
         <div>
-             <CommentSection setShowComment={setShowComment} showComment={showComment} videoId={videoId}/>
+          <CommentSection
+            setShowComment={setShowComment}
+            showComment={showComment}
+            videoId={videoId}
+          />
         </div>
       )}
     </div>
