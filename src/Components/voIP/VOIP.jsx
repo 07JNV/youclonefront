@@ -11,7 +11,7 @@ import { BsFillRecordFill } from "react-icons/bs";
 import { BsRecord } from "react-icons/bs";
 import { IoMdDownload } from "react-icons/io";
 
-const socket = io.connect("http://localhost:8080");
+const socket = io.connect("https://youtubeclone007jnv.onrender.com");
 
 const App = () => {
   const [myEmail, setMyEmail] = useState("");
@@ -85,7 +85,7 @@ const App = () => {
   const registerUser = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/user/points/?email=${myEmail}`,
+        `https://youtubeclone007jnv.onrender.com/user/points/?email=${myEmail}`,
         {
           method: "GET",
           headers: {
@@ -117,7 +117,7 @@ const App = () => {
     
     try {
       const response = await fetch(
-        `http://localhost:8080/user/points/?email=${targetEmail}`,
+        `https://youtubeclone007jnv.onrender.com/user/points/?email=${targetEmail}`,
         {
           method: "GET",
           headers: {
