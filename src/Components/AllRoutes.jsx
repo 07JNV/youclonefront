@@ -9,6 +9,7 @@ import LikedVideo from "../Pages/LikedVideo/LikedVideo";
 import VideoPage from "../Pages/VideoPage/VideoPage";
 import Chanel from "../Pages/Chanel/Chanel";
 import Search from "../Pages/Search/Search";
+import VOIP from "./voIP/VOIP";
 // import CustomVideoPlayer from "./customVideoPlayer/customVideoPlayer";
 function AllRoutes({ setEditCreateChanelBtn,setVidUploadPage }) {
   return (
@@ -21,6 +22,8 @@ function AllRoutes({ setEditCreateChanelBtn,setVidUploadPage }) {
       <Route path="/yourvideos" element={<YourVideo />} />
       <Route path="/videopage/:vid" element={<VideoPage />} />
       <Route path="/seacrh/:searchQuery" element={<Search />} />
+      <Route path="/voip" element={<VOIP />} />
+
       <Route
         path="/chanel/:Cid"
         element={<Chanel 

@@ -1,7 +1,7 @@
 import "./App.css";
 import React, { useEffect } from "react";
 import Navbar from "./Components/Navbar/Navbar";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Route} from "react-router-dom";
 import { useState } from "react";
 import AllRoutes from "./Components/AllRoutes";
 import DrawerSidebar from "./Components/LeftSidebar/DrawerSidebar";
