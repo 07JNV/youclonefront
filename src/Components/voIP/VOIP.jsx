@@ -392,24 +392,24 @@ const App = () => {
   const [isButtonEnabled, setIsButtonEnabled] = useState(true);
   const [style, setStyle] = useState({ cursor: "pointer" });
 
-  // const checkTime = () => {
-  //   const now = new Date();
-  //   const hours = now.getHours();
-  //   if (hours >= 18 && hours <= 24) {
-  //     setIsButtonEnabled(true);
-  //     setStyle({ cursor: "pointer" });
-  //   } else {
-  //     setStyle({ cursor: "not-allowed" });
-  //     alert("call between 6PM and 12AM");
-  //     setIsButtonEnabled(false);
-  //   }
-  // };
+  const checkTime = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    if (hours >= 18 && hours <= 24) {
+      setIsButtonEnabled(true);
+      setStyle({ cursor: "pointer" });
+    } else {
+      setStyle({ cursor: "not-allowed" });
+      alert("call between 6PM and 12AM");
+      setIsButtonEnabled(false);
+    }
+  };
 
-  // useEffect(() => {
-  //   checkTime();
-  //   const intervalId = setInterval(checkTime, 60 * 1000); // Check every minute
-  //   return () => clearInterval(intervalId); // Clean up the interval on component unmount
-  // }, []);
+  useEffect(() => {
+    checkTime();
+    const intervalId = setInterval(checkTime, 60 * 1000); // Check every minute
+    return () => clearInterval(intervalId); // Clean up the interval on component unmount
+  }, []);
 
   // console.log(screenVideo)
 
