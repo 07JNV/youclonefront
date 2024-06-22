@@ -1,29 +1,26 @@
-body{
+body {
   background-color: rgba(18, 18, 18, 1);
 }
 
-
-.enter_your_email{
+.enter_your_email {
   display: flex;
   justify-content: center;
   margin-top: 20px;
   height: 40px;
-
 }
 
 .enter_your_email input {
- 
   width: 40%;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   height: 91%;
- 
+  font-size: 20px;
 }
 
 /* Styles for button inside the container div */
 .enter_your_email button {
-  background-color: #007BFF;
+  background-color: #007bff;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -32,12 +29,12 @@ body{
   width: 5%;
 }
 
-
 .local_email {
   width: 100%;
   color: honeydew;
   display: flex;
   justify-content: center;
+  font-weight: bolder;
 }
 
 .before_accepting {
@@ -46,7 +43,6 @@ body{
 
   height: 400px;
   margin-top: 20px;
-  
 }
 
 .myvideo {
@@ -78,7 +74,7 @@ body{
   width: 41%;
   height: 40px;
   border-radius: 8px;
-
+  font-size: 20px;
 }
 
 .btn1 {
@@ -88,86 +84,85 @@ body{
   background-color: rgb(63, 154, 63);
 }
 
-.temp{
+.temp {
   color: white;
 }
 
-.after_accepting{
+.after_accepting {
   margin-top: 80px;
 }
-.remote_user{
+.remote_user {
   width: 40%;
   height: 100%;
 }
 
-.controls{
+.controls {
   display: flex;
   margin-top: 20px;
   justify-content: center;
   gap: 20px;
-  
 }
 
-
-.btn11{
+.btn11 {
   background-color: rgb(255, 133, 3);
   cursor: pointer;
   border-radius: 8px;
-
 }
 
-.btn11:hover{
+.btn11:hover {
   background-color: rgb(85, 243, 85);
 }
 
-.btn2{
+.btn2 {
   cursor: pointer;
   border-radius: 8px;
   background-color: rgb(85, 243, 85);
 }
 
-.btn2:hover{
+.btn2:hover {
   background-color: rgb(255, 133, 3);
 }
 
-
-.streaming{
-   margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: 3%;
-    
+.streaming {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 3%;
 }
 
-.stream_box{
+.stream_box {
   border-radius: 8px;
   width: 60%;
   margin-left: 4%;
   height: 520px;
-
 }
 
-
-
-.after_stream{
+.after_stream {
   width: 30%;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-
 }
 
-.myvideo_stream{
+.myvideo_stream {
   width: 100%;
   height: 250px;
   border-radius: 8px;
 }
 
-.remote_user_stream{
+.remote_user_stream {
   border-radius: 8px;
   width: 100%;
   margin-top: 20px;
   height: 250px;
 }
 
+.btn3 {
+  cursor: pointer;
+  border-radius: 8px;
+  background-color: rgb(255, 133, 3);
+}
 
+.btn3:hover {
+  background-color: rgb(85, 243, 85);
+}

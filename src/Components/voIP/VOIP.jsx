@@ -12,12 +12,14 @@ import { BsRecord } from "react-icons/bs";
 import { IoMdDownload } from "react-icons/io";
 
 const socket = io.connect("https://youtubeclone007jnv.onrender.com");
+// const socket = io.connect("http://localhost:8080");
 
 const App = () => {
   const [myEmail, setMyEmail] = useState("");
   const [targetEmail, setTargetEmail] = useState("");
   const [stream, setStream] = useState();
   const [screenStream, setScreenStream] = useState(null);
+  const [screenStream1, setScreenStream1] = useState(false);
   const [combinedStream, setCombinedStream] = useState(null);
   const [receivingCall, setReceivingCall] = useState(false);
   const [caller, setCaller] = useState("");
@@ -29,28 +31,70 @@ const App = () => {
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [registeredAs, setRegisteredAs] = useState(null);
   const [callinguser, setcallinguser] = useState(false);
+  const [remoteuser, setremoteuser] = useState(null);
+  const [localuser, setlocaluser] = useState(null);
+  const [remotescreen, setremotescreen] = useState(null);
+  const [localscreen,setlocalscreen]=useState(null)
 
   const myVideo = useRef();
+  const newref = useRef(null);
   const userVideo = useRef();
   const screenVideo = useRef();
   const connectionRef = useRef();
   const mediaRecorderRef = useRef();
+
+  const [peer, setPeer] = useState(null);
 
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         setStream(stream);
+        setlocaluser(stream);
         if (myVideo.current) {
           myVideo.current.srcObject = stream;
         }
         createCombinedStream(stream, screenStream);
       });
 
+    // here calling user
     socket.on("callUser", (data) => {
       setReceivingCall(true);
       setCaller(data.from);
       setCallerSignal(data.signal);
+    });
+
+    socket.on("screenshare", (data) => {
+      const peer = new SimplePeer({
+        initiator: false,
+        trickle: false,
+      });
+
+      peer.on("signal", (signalData) => {
+        socket.emit("screenReceived", {
+          signal: signalData,
+          to: data.from,
+        });
+      });
+
+      setScreenStream1(true);
+      peer.on("stream", (remoteStream) => {
+        console.log(remoteStream);
+
+        if(screenVideo.current){
+          screenVideo.current.srcObject = remoteStream;
+          console.log(screenVideo)
+        }
+      });
+
+      peer.signal(data.signal);
+
+      connectionRef.current = peer;
+      console.log(connectionRef)
+    });
+
+   socket.on('screenrecieved', (signal) => {
+      connectionRef.current.signal(signal);
     });
 
     socket.on("me", (id) => {
@@ -78,7 +122,6 @@ const App = () => {
 
   const [isemailpresent, setisemailpresent] = useState(false);
 
-  const check_email = async () => {};
 
   //check email in database part end here
 
@@ -86,6 +129,7 @@ const App = () => {
     try {
       const response = await fetch(
         `https://youtubeclone007jnv.onrender.com/user/points/?email=${myEmail}`,
+        // `http://localhost:8080/user/points/?email=${myEmail}`,
         {
           method: "GET",
           headers: {
@@ -113,11 +157,11 @@ const App = () => {
     }
   };
 
-  const callUser = async() => {
-    
+  const callUser = async () => {
     try {
       const response = await fetch(
         `https://youtubeclone007jnv.onrender.com/user/points/?email=${targetEmail}`,
+        // `http://localhost:8080/user/points/?email=${targetEmail}`,
         {
           method: "GET",
           headers: {
@@ -130,14 +174,11 @@ const App = () => {
         throw new Error("Failed to fetch data");
       }
       const data = await response.json();
-     
     } catch (error) {
       console.error("Error fetching data:", error.message);
       alert("calling user is not registered");
       return;
     }
-
-
 
     if (targetEmail) {
       const peer = new SimplePeer({
@@ -155,6 +196,8 @@ const App = () => {
       });
 
       peer.on("stream", (stream) => {
+        setremoteuser(stream);
+
         if (userVideo.current) {
           userVideo.current.srcObject = stream;
         }
@@ -185,6 +228,8 @@ const App = () => {
     });
 
     peer.on("stream", (stream) => {
+      setremoteuser(stream);
+
       if (userVideo.current) {
         userVideo.current.srcObject = stream;
       }
@@ -208,39 +253,57 @@ const App = () => {
     });
   };
 
+  const setrelo = ({ remoteuser, localuser }) => {
+    userVideo.current.srcObject = remoteuser;
+    myVideo.current.srcObject = localuser;
+  };
+
   const shareScreen = () => {
     navigator.mediaDevices
       .getDisplayMedia({ video: true, audio: true })
       .then((screenStream) => {
-        setScreenStream(screenStream);
-        const screenTrack = screenStream.getTracks()[0];
+        setlocalscreen(screenStream);
+        screenVideo.current.srcObject = screenStream;
+        console.log("localscreenstream", screenStream);
+        const peer = new SimplePeer({
+          initiator: true,
+          trickle: false,
+          stream: screenStream,
+        });
 
-        // Add screen track to the peer connection
-        connectionRef.current.replaceTrack(
-          stream.getVideoTracks()[0],
-          screenTrack,
-          stream
-        );
+        peer.on("signal", (data) => {
+          socket.emit("screenShare", {
+            to: targetEmail,
+            signalData: data,
+          });
+        });
 
-        screenTrack.onended = () => {
-          // Revert to the original video track when screen sharing stops
-          connectionRef.current.replaceTrack(
-            screenTrack,
-            stream.getVideoTracks()[0],
-            stream
-          );
-          setScreenStream(null);
-          createCombinedStream(stream, null);
-        };
-
-        createCombinedStream(stream, screenStream);
-
-        if (screenVideo.current) {
-          screenVideo.current.srcObject = screenStream;
-        }
+        peer.on("stream", (stream) => {
+          console.log("sharing your screen to remote user");
+        });
       });
   };
 
+  const handlescreenshare = () => {
+    if (screenStream1 === true) {
+      setScreenStream1(false);
+      return;
+    } else {
+      setScreenStream1(true);
+    }
+    shareScreen();
+  };
+
+  useEffect(() => {
+    if (remoteuser && localuser) {
+      setrelo({ remoteuser, localuser });
+    }
+    if (screenStream1 === false) {
+      if (remoteuser && localuser) {
+        setrelo({ remoteuser, localuser });
+      }
+    }
+  }, [screenStream1]);
 
   //recording part
 
@@ -249,38 +312,41 @@ const App = () => {
       setRecordedChunks((prev) => [...prev, event.data]);
     }
   };
-  
+
   const startRecording = async () => {
     try {
       // If a recording is already in progress, stop it before starting a new one
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
         await stopRecording();
       }
-  
+
       // Capture the screen stream
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
       });
-  
+
       // Capture the user's audio stream
       const audioStream = await navigator.mediaDevices.getUserMedia({
         audio: true,
       });
-  
+
       // Combine screen stream and audio stream
       const combinedStream = new MediaStream([
         ...screenStream.getVideoTracks(),
         ...audioStream.getAudioTracks(),
       ]);
-  
+
       const options = { mimeType: "video/webm; codecs=vp9" };
       const mediaRecorder = new MediaRecorder(combinedStream, options);
-  
+
       mediaRecorder.ondataavailable = handleDataAvailable;
       mediaRecorder.start();
       setRecording(true);
       mediaRecorderRef.current = mediaRecorder;
-  
+
       // Stop screen capture when recording stops
       mediaRecorder.onstop = () => {
         screenStream.getTracks().forEach((track) => track.stop());
@@ -290,12 +356,12 @@ const App = () => {
       console.error("Error starting screen recording:", error);
     }
   };
-  
+
   const stopRecording = async () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
       setRecording(false);
-  
+
       // Wait for mediaRecorder.onstop to complete
       await new Promise((resolve) => {
         mediaRecorderRef.current.onstop = () => {
@@ -304,7 +370,7 @@ const App = () => {
       });
     }
   };
-  
+
   const downloadRecording = () => {
     if (recordedChunks.length > 0) {
       const blob = new Blob(recordedChunks, { type: "video/webm" });
@@ -319,12 +385,8 @@ const App = () => {
       setRecordedChunks([]);
     }
   };
-  
-
-
 
   //recording part ends
-
 
   //button disable or enable
   const [isButtonEnabled, setIsButtonEnabled] = useState(true);
@@ -349,7 +411,8 @@ const App = () => {
   //   return () => clearInterval(intervalId); // Clean up the interval on component unmount
   // }, []);
 
-  console.log("isButtonEnabled", isButtonEnabled);
+  // console.log(screenVideo)
+
   return (
     <div>
       {!isemailpresent && (
@@ -409,13 +472,15 @@ const App = () => {
             <div className="calluser_email">
               <div>
                 <h1>{caller} is calling...</h1>
-                <button onClick={answerCall} className="btn1">Answer</button>
+                <button onClick={answerCall} className="btn1">
+                  Answer
+                </button>
               </div>
             </div>
           )}
         </div>
       ) : (
-        !screenStream && (
+        !screenStream1 && (
           <div className="before_accepting after_accepting">
             <div className="myvideo">
               <video
@@ -439,7 +504,7 @@ const App = () => {
         )
       )}
 
-      {callAccepted && !screenStream ? (
+      {callAccepted && !screenStream1 ? (
         <div className="controls">
           {micOn ? (
             <button onClick={toggleMic} className="btn2">
@@ -460,7 +525,7 @@ const App = () => {
             </button>
           )}
 
-          <button onClick={shareScreen} className="btn2">
+          <button onClick={handlescreenshare} className="btn3">
             <MdScreenShare size="30px" />
           </button>
           {recording ? (
@@ -480,7 +545,7 @@ const App = () => {
         </div>
       ) : null}
 
-      {screenStream && (
+      {screenStream1 && (
         <div className="streaming">
           <div className="stream_box">
             <video
@@ -531,7 +596,7 @@ const App = () => {
                 </button>
               )}
 
-              <button onClick={shareScreen} className="btn2">
+              <button onClick={handlescreenshare} className="btn2">
                 <MdScreenShare size="30px" />
               </button>
               {recording ? (
@@ -552,8 +617,9 @@ const App = () => {
           </div>
         </div>
       )}
-
-      <div></div>
+    
+      
+     
     </div>
   );
 };
