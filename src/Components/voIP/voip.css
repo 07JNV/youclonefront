@@ -166,3 +166,23 @@ body {
 .btn3:hover {
   background-color: rgb(85, 243, 85);
 }
+
+
+
+.fixed-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  transition: background-color 0.3s;
+}
+
+.fixed-button:hover {
+  background-color: #0056b3;
+}

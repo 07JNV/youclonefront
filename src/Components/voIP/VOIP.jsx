@@ -34,7 +34,7 @@ const App = () => {
   const [remoteuser, setremoteuser] = useState(null);
   const [localuser, setlocaluser] = useState(null);
   const [remotescreen, setremotescreen] = useState(null);
-  const [localscreen,setlocalscreen]=useState(null)
+  const [localscreen, setlocalscreen] = useState(null);
 
   const myVideo = useRef();
   const newref = useRef(null);
@@ -64,14 +64,17 @@ const App = () => {
       setCallerSignal(data.signal);
     });
 
-    socket.on("screenshare", (data) => {
+    //sharing screen part
+
+    socket.on("screenReceived", (data) => {
       const peer = new SimplePeer({
         initiator: false,
         trickle: false,
       });
-
+    
+      console.log("data",data);
       peer.on("signal", (signalData) => {
-        socket.emit("screenReceived", {
+        socket.emit("inresponse", {
           signal: signalData,
           to: data.from,
         });
@@ -81,22 +84,27 @@ const App = () => {
       peer.on("stream", (remoteStream) => {
         console.log(remoteStream);
 
-        if(screenVideo.current){
+        console.log(remoteStream.getVideoTracks)
+
+        if (screenVideo.current) {
           screenVideo.current.srcObject = remoteStream;
-          console.log(screenVideo)
+          console.log(screenVideo);
         }
       });
 
       peer.signal(data.signal);
 
       connectionRef.current = peer;
-      console.log(connectionRef)
     });
 
-   socket.on('screenrecieved', (signal) => {
-      connectionRef.current.signal(signal);
+
+    socket.on("responsefromreceiver", (signal) => {
+      console.log("signal received");
     });
 
+   
+
+    // share screen part ends
     socket.on("me", (id) => {
       console.log("Registered with ID:", id);
     });
@@ -121,7 +129,6 @@ const App = () => {
   //check email in database
 
   const [isemailpresent, setisemailpresent] = useState(false);
-
 
   //check email in database part end here
 
@@ -264,23 +271,40 @@ const App = () => {
       .then((screenStream) => {
         setlocalscreen(screenStream);
         screenVideo.current.srcObject = screenStream;
-        console.log("localscreenstream", screenStream);
-        const peer = new SimplePeer({
+
+        const newPeer = new SimplePeer({
           initiator: true,
           trickle: false,
           stream: screenStream,
         });
 
-        peer.on("signal", (data) => {
+        newPeer.on("signal", (data) => {
           socket.emit("screenShare", {
             to: targetEmail,
             signalData: data,
+            from: myEmail,
           });
         });
 
-        peer.on("stream", (stream) => {
-          console.log("sharing your screen to remote user");
+        newPeer.on("stream", (remoteStream) => {
+          console.log("Remote stream received");
         });
+
+
+      
+
+        connectionRef.current = newPeer;
+
+        newPeer.on("error", (err) => {
+          console.error("Peer connection error:", err);
+        });
+
+        newPeer.on("close", () => {
+          console.log("Peer connection closed");
+        });
+      })
+      .catch((err) => {
+        console.error("Error accessing screen media:", err);
       });
   };
 
@@ -617,9 +641,8 @@ const App = () => {
           </div>
         </div>
       )}
+
     
-      
-     
     </div>
   );
 };

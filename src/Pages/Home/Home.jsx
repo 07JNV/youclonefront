@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import LeftSidebar from "../../Components/LeftSidebar/LeftSidebar";
 import ShowVideoGrid from "../../Components/ShowVideoGrid/ShowVideoGrid";
+import ButtonComponent from "../../Components/voIP/ButtonComponent";
 
 // import vid from "../../Components/Video/vid.mp4";
 import "./Home.css";
@@ -67,6 +68,7 @@ function Home() {
               </p>
             );
           })}
+         <ButtonComponent/>
         </div>
         <ShowVideoGrid vids={vids} />
       </div>
