@@ -11,8 +11,8 @@ import { BsFillRecordFill } from "react-icons/bs";
 import { BsRecord } from "react-icons/bs";
 import { IoMdDownload } from "react-icons/io";
 
-// const socket = io.connect("https://youtubeclone007jnv.onrender.com");
-const socket = io.connect("http://localhost:8080");
+const socket = io.connect("https://youtubeclone007jnv.onrender.com");
+// const socket = io.connect("http://localhost:8080");
 
 const App = () => {
   const [myEmail, setMyEmail] = useState("");
@@ -131,8 +131,8 @@ const App = () => {
   const registerUser = async () => {
     try {
       const response = await fetch(
-        // `https://youtubeclone007jnv.onrender.com/user/points/?email=${myEmail}`,
-        `http://localhost:8080/user/points/?email=${myEmail}`,
+        `https://youtubeclone007jnv.onrender.com/user/points/?email=${myEmail}`,
+        // `http://localhost:8080/user/points/?email=${myEmail}`,
         {
           method: "GET",
           headers: {
@@ -163,8 +163,8 @@ const App = () => {
   const callUser = async () => {
     try {
       const response = await fetch(
-        // `https://youtubeclone007jnv.onrender.com/user/points/?email=${targetEmail}`,
-        `http://localhost:8080/user/points/?email=${targetEmail}`,
+        `https://youtubeclone007jnv.onrender.com/user/points/?email=${targetEmail}`,
+        // `http://localhost:8080/user/points/?email=${targetEmail}`,
         {
           method: "GET",
           headers: {
