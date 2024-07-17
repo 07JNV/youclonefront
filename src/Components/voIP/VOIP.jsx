@@ -11,8 +11,8 @@ import { BsFillRecordFill } from "react-icons/bs";
 import { BsRecord } from "react-icons/bs";
 import { IoMdDownload } from "react-icons/io";
 
-const socket = io.connect("https://youtubeclone007jnv.onrender.com");
-// const socket = io.connect("http://localhost:8080");
+// const socket = io.connect("https://youtubeclone007jnv.onrender.com");
+const socket = io.connect("http://localhost:8080");
 
 const App = () => {
   const [myEmail, setMyEmail] = useState("");
@@ -21,6 +21,7 @@ const App = () => {
   const [screenStream, setScreenStream] = useState(null);
   const [screenStream1, setScreenStream1] = useState(false);
   const [combinedStream, setCombinedStream] = useState(null);
+  const [combinedStream1, setCombinedStream1] = useState(null);
   const [receivingCall, setReceivingCall] = useState(false);
   const [caller, setCaller] = useState("");
   const [callerSignal, setCallerSignal] = useState();
@@ -67,13 +68,12 @@ const App = () => {
     //sharing screen part
 
     socket.on("screenReceived", (data) => {
-      const peer = new SimplePeer({
+      const newpeer = new SimplePeer({
         initiator: false,
         trickle: false,
       });
-    
-      console.log("data",data);
-      peer.on("signal", (signalData) => {
+
+      newpeer.on("signal", (signalData) => {
         socket.emit("inresponse", {
           signal: signalData,
           to: data.from,
@@ -81,28 +81,22 @@ const App = () => {
       });
 
       setScreenStream1(true);
-      peer.on("stream", (remoteStream) => {
-        console.log(remoteStream);
-
-        console.log(remoteStream.getVideoTracks)
-
+     
+      newpeer.on("stream", (stream) => {
+        console.log(stream);
+        setremotescreen(stream);
         if (screenVideo.current) {
-          screenVideo.current.srcObject = remoteStream;
+          screenVideo.current.srcObject = stream;
           console.log(screenVideo);
         }
       });
 
-      peer.signal(data.signal);
-
-      connectionRef.current = peer;
+      newpeer.signal(data.signal);
     });
-
 
     socket.on("responsefromreceiver", (signal) => {
       console.log("signal received");
     });
-
-   
 
     // share screen part ends
     socket.on("me", (id) => {
@@ -126,6 +120,8 @@ const App = () => {
     setCombinedStream(combinedStream);
   };
 
+ 
+
   //check email in database
 
   const [isemailpresent, setisemailpresent] = useState(false);
@@ -135,8 +131,8 @@ const App = () => {
   const registerUser = async () => {
     try {
       const response = await fetch(
-        `https://youtubeclone007jnv.onrender.com/user/points/?email=${myEmail}`,
-        // `http://localhost:8080/user/points/?email=${myEmail}`,
+        // `https://youtubeclone007jnv.onrender.com/user/points/?email=${myEmail}`,
+        `http://localhost:8080/user/points/?email=${myEmail}`,
         {
           method: "GET",
           headers: {
@@ -167,8 +163,8 @@ const App = () => {
   const callUser = async () => {
     try {
       const response = await fetch(
-        `https://youtubeclone007jnv.onrender.com/user/points/?email=${targetEmail}`,
-        // `http://localhost:8080/user/points/?email=${targetEmail}`,
+        // `https://youtubeclone007jnv.onrender.com/user/points/?email=${targetEmail}`,
+        `http://localhost:8080/user/points/?email=${targetEmail}`,
         {
           method: "GET",
           headers: {
@@ -216,6 +212,7 @@ const App = () => {
       });
 
       connectionRef.current = peer;
+      setPeer(peer);
     } else {
       alert("Please enter the email of the user you want to call.");
     }
@@ -244,6 +241,7 @@ const App = () => {
 
     peer.signal(callerSignal);
     connectionRef.current = peer;
+    setPeer(peer);
   };
 
   const toggleMic = () => {
@@ -265,48 +263,45 @@ const App = () => {
     myVideo.current.srcObject = localuser;
   };
 
-  const shareScreen = () => {
-    navigator.mediaDevices
-      .getDisplayMedia({ video: true, audio: true })
-      .then((screenStream) => {
-        setlocalscreen(screenStream);
-        screenVideo.current.srcObject = screenStream;
 
-        const newPeer = new SimplePeer({
-          initiator: true,
-          trickle: false,
-          stream: screenStream,
-        });
 
-        newPeer.on("signal", (data) => {
-          socket.emit("screenShare", {
-            to: targetEmail,
-            signalData: data,
-            from: myEmail,
-          });
-        });
+  const shareScreen = async () => {
+    try {
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true,
+      });
 
-        newPeer.on("stream", (remoteStream) => {
-          console.log("Remote stream received");
-        });
+      createCombinedStream(displayStream, screenStream);
 
+      setlocalscreen(displayStream);
+      screenVideo.current.srcObject = displayStream;
+
+      const newPeer = new SimplePeer({
+        initiator: true,
+        trickle: false,
+        stream: combinedStream,
+      });
 
       
 
-        connectionRef.current = newPeer;
-
-        newPeer.on("error", (err) => {
-          console.error("Peer connection error:", err);
+      newPeer.on("signal", (data) => {
+        socket.emit("screenShare", {
+          to: targetEmail,
+          signalData: data,
+          from: myEmail,
         });
-
-        newPeer.on("close", () => {
-          console.log("Peer connection closed");
-        });
-      })
-      .catch((err) => {
-        console.error("Error accessing screen media:", err);
       });
+
+      newPeer.on("stream", (remoteStream) => {
+        console.log("Remote stream received");
+      });
+    } catch (err) {
+      console.error("Error getting display media:", err);
+    }
   };
+
+
 
   const handlescreenshare = () => {
     if (screenStream1 === true) {
@@ -371,7 +366,6 @@ const App = () => {
       setRecording(true);
       mediaRecorderRef.current = mediaRecorder;
 
-      // Stop screen capture when recording stops
       mediaRecorder.onstop = () => {
         screenStream.getTracks().forEach((track) => track.stop());
         audioStream.getTracks().forEach((track) => track.stop());
@@ -416,26 +410,38 @@ const App = () => {
   const [isButtonEnabled, setIsButtonEnabled] = useState(true);
   const [style, setStyle] = useState({ cursor: "pointer" });
 
-  const checkTime = () => {
-    const now = new Date();
-    const hours = now.getHours();
-    if (hours >= 18 && hours <= 24) {
-      setIsButtonEnabled(true);
-      setStyle({ cursor: "pointer" });
-    } else {
-      setStyle({ cursor: "not-allowed" });
-      alert("call between 6PM and 12AM");
-      setIsButtonEnabled(false);
-    }
-  };
+  // const checkTime = () => {
+  //   const now = new Date();
+  //   const hours = now.getHours();
+  //   if (hours >= 18 && hours <= 24) {
+  //     setIsButtonEnabled(true);
+  //     setStyle({ cursor: "pointer" });
+  //   } else {
+  //     setStyle({ cursor: "not-allowed" });
+  //     alert("call between 6PM and 12AM");
+  //     setIsButtonEnabled(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    checkTime();
-    const intervalId = setInterval(checkTime, 60 * 1000); // Check every minute
-    return () => clearInterval(intervalId); // Clean up the interval on component unmount
-  }, []);
+  // useEffect(() => {
+  //   checkTime();
+  //   const intervalId = setInterval(checkTime, 60 * 1000); // Check every minute
+  //   return () => clearInterval(intervalId); // Clean up the interval on component unmount
+  // }, []);
 
   // console.log(screenVideo)
+
+  // useEffect(() => {
+  //   if (screenVideo.current) {
+  //     screenVideo.current.onloadedmetadata = () => {
+  //       console.log(screenVideo.current.videoWidth);
+  //       console.log(screenVideo.current.videoHeight);
+  //     };
+  //   }
+  // }, [screenVideo]);
+
+
+  console.log("remotescreen",remotescreen);
 
   return (
     <div>
@@ -477,7 +483,7 @@ const App = () => {
                   onChange={(e) => setTargetEmail(e.target.value)}
                 />
                 <button
-                  disabled={!isButtonEnabled}
+                  // disabled={!isButtonEnabled}
                   style={style}
                   className="btn1"
                   onClick={callUser}
@@ -641,8 +647,6 @@ const App = () => {
           </div>
         </div>
       )}
-
-    
     </div>
   );
 };

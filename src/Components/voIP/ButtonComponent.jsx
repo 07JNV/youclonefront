@@ -7,7 +7,7 @@ const ButtonComponent = () => {
     const navigate = useNavigate();
 
     const handleClick = () => {
-      navigate('/voip');
+      window.open('/voip', '_blank');
     };
   return (
     <button className="fixed-button" onClick={handleClick}>
